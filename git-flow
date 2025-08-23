@@ -1,0 +1,26 @@
+// git-flow 정책
+// 1. main은 배포용
+// 2. develop은 개발용
+// 3. feature는 개발용
+// 4. release는 배포용
+// 5. hotfix는 배포용
+
+
+// git-flow 사용 방법
+// 1. feature 브랜치에서 각각의 브랜치를 따서 develop 브랜치에 pr 후 merge를 한다.
+// 2. release 브랜치에서 develop 브랜치에 pr 후 merge를 한다.
+// 3. hotfix 브랜치에서 main 브랜치에 pr 후 merge를 한다.
+
+
+// git-flow 사용 예시
+// 1. feature 브랜치 생성
+// git flow feature start feature-name
+// 2. feature 브랜치에서 각각의 브랜치를 따서 develop 브랜치에 pr 후 merge를 한다.
+// git flow feature finish feature-name
+// 3. release 브랜치에서 develop 브랜치에 pr 후 merge를 한다.
+// git flow release start release-name
+// git flow release finish release-name
+// 4. hotfix 브랜치에서 main 브랜치
+
+// main <- release <- develop <- feature
+// main <- hotfix
