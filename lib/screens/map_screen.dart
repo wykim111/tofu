@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import '../providers/walk_provider.dart';
 import '../core/theme/app_theme.dart';
-import '../core/constants/map_style.dart';
 import '../core/utils/walk_calculator.dart';
 import '../widgets/map_control_button.dart';
 import '../widgets/stat_card.dart';
@@ -16,8 +14,6 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
-  GoogleMapController? _mapController;
-
   @override
   void initState() {
     super.initState();
@@ -26,62 +22,18 @@ class _MapScreenState extends State<MapScreen> {
     });
   }
 
-  Set<Polyline> _buildPolylines(WalkProvider wp) {
-    final polylines = <Polyline>{};
-    if (wp.currentSession == null || wp.currentSession!.path.isEmpty) return polylines;
-
-    final points = wp.currentSession!.path
-        .map((p) => LatLng(p.latitude, p.longitude))
-        .toList();
-
-    polylines.add(Polyline(
-      polylineId: const PolylineId('walk_path'),
-      points: points,
-      color: kAccentViolet,
-      width: 4,
-      patterns: [PatternItem.dash(20), PatternItem.gap(10)],
-    ));
-    return polylines;
-  }
-
-  Set<Marker> _buildMarkers(WalkProvider wp) {
-    final markers = <Marker>{};
-    if (wp.currentSession != null && wp.currentSession!.path.isNotEmpty) {
-      final start = wp.currentSession!.path.first;
-      markers.add(Marker(
-        markerId: const MarkerId('start'),
-        position: LatLng(start.latitude, start.longitude),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueViolet),
-        infoWindow: const InfoWindow(title: '시작'),
-      ));
-    }
-    return markers;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Consumer<WalkProvider>(
       builder: (context, wp, _) {
-        final target = LatLng(wp.currentUser.latitude, wp.currentUser.longitude);
-
         return Scaffold(
           backgroundColor: kBgPrimary,
           body: Stack(
             children: [
-              // 지도
-              GoogleMap(
-                initialCameraPosition: CameraPosition(target: target, zoom: 16),
-                onMapCreated: (controller) async {
-                  _mapController = controller;
-                  await controller.setMapStyle(kMapStyleDark);
-                },
-                polylines: _buildPolylines(wp),
-                markers: _buildMarkers(wp),
-                myLocationEnabled: true,
-                myLocationButtonEnabled: false,
-                zoomControlsEnabled: false,
-                mapToolbarEnabled: false,
-                compassEnabled: false,
+              // 지도 플레이스홀더
+              _MapPlaceholder(
+                isWalking: wp.isWalking,
+                path: wp.currentSession?.path ?? [],
               ),
 
               // 상단 상태 바 (산책 중일 때)
@@ -99,29 +51,13 @@ class _MapScreenState extends State<MapScreen> {
                 top: MediaQuery.of(context).padding.top + (wp.isWalking ? 80 : 20),
                 child: Column(
                   children: [
-                    MapControlButton(
-                      icon: Icons.add,
-                      onPressed: () => _mapController?.animateCamera(CameraUpdate.zoomIn()),
-                    ),
+                    MapControlButton(icon: Icons.add, onPressed: () {}),
                     const SizedBox(height: 8),
-                    MapControlButton(
-                      icon: Icons.remove,
-                      onPressed: () => _mapController?.animateCamera(CameraUpdate.zoomOut()),
-                    ),
+                    MapControlButton(icon: Icons.remove, onPressed: () {}),
                     const SizedBox(height: 8),
-                    MapControlButton(
-                      icon: Icons.my_location,
-                      onPressed: () {
-                        _mapController?.animateCamera(
-                          CameraUpdate.newLatLng(target),
-                        );
-                      },
-                    ),
+                    MapControlButton(icon: Icons.my_location, onPressed: () {}),
                     const SizedBox(height: 8),
-                    MapControlButton(
-                      icon: Icons.layers_outlined,
-                      onPressed: () {},
-                    ),
+                    MapControlButton(icon: Icons.layers_outlined, onPressed: () {}),
                   ],
                 ),
               ),
@@ -160,7 +96,6 @@ class _MapScreenState extends State<MapScreen> {
                           ),
 
                           if (wp.isWalking) ...[
-                            // 실시간 통계
                             Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 16),
                               child: GridView.count(
@@ -202,12 +137,10 @@ class _MapScreenState extends State<MapScreen> {
                               ),
                             ),
                             const SizedBox(height: 16),
-                            // 컨트롤 버튼
                             Padding(
                               padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                               child: Row(
                                 children: [
-                                  // 정지
                                   GestureDetector(
                                     onTap: wp.stopWalk,
                                     child: Container(
@@ -222,7 +155,6 @@ class _MapScreenState extends State<MapScreen> {
                                     ),
                                   ),
                                   const SizedBox(width: 12),
-                                  // 일시정지/재시작
                                   Expanded(
                                     child: GestureDetector(
                                       onTap: wp.isPaused ? wp.resumeWalk : wp.pauseWalk,
@@ -238,9 +170,7 @@ class _MapScreenState extends State<MapScreen> {
                                           mainAxisAlignment: MainAxisAlignment.center,
                                           children: [
                                             Icon(
-                                              wp.isPaused
-                                                  ? Icons.play_arrow_rounded
-                                                  : Icons.pause_rounded,
+                                              wp.isPaused ? Icons.play_arrow_rounded : Icons.pause_rounded,
                                               color: Colors.white,
                                               size: 22,
                                             ),
@@ -259,7 +189,6 @@ class _MapScreenState extends State<MapScreen> {
                                     ),
                                   ),
                                   const SizedBox(width: 12),
-                                  // 마커
                                   Container(
                                     width: 52,
                                     height: 52,
@@ -274,7 +203,6 @@ class _MapScreenState extends State<MapScreen> {
                               ),
                             ),
                           ] else ...[
-                            // 산책 시작 전
                             Padding(
                               padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
                               child: Column(
@@ -283,10 +211,7 @@ class _MapScreenState extends State<MapScreen> {
                                     wp.currentUser.dog?.name != null
                                         ? '${wp.currentUser.dog!.name}와 산책을 시작해볼까요?'
                                         : '산책을 시작해볼까요?',
-                                    style: const TextStyle(
-                                      fontSize: 15,
-                                      color: kTextSecondary,
-                                    ),
+                                    style: const TextStyle(fontSize: 15, color: kTextSecondary),
                                   ),
                                   const SizedBox(height: 16),
                                   SizedBox(
@@ -319,12 +244,137 @@ class _MapScreenState extends State<MapScreen> {
       },
     );
   }
+}
+
+/// Google Maps 대신 사용하는 커스텀 지도 플레이스홀더
+class _MapPlaceholder extends StatelessWidget {
+  final bool isWalking;
+  final List<dynamic> path;
+
+  const _MapPlaceholder({required this.isWalking, required this.path});
 
   @override
-  void dispose() {
-    _mapController?.dispose();
-    super.dispose();
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      color: const Color(0xFF1a2035),
+      child: CustomPaint(
+        painter: _PathPainter(path: path, isWalking: isWalking),
+        child: Center(
+          child: !isWalking
+              ? Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.map_outlined, size: 64, color: kTextMuted.withValues(alpha: 0.4)),
+                    const SizedBox(height: 12),
+                    Text(
+                      '산책을 시작하면\n경로가 표시됩니다',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: kTextMuted.withValues(alpha: 0.6),
+                        height: 1.6,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: kAccentPurple.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: kAccentPurple.withValues(alpha: 0.3)),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.info_outline, size: 13, color: kAccentViolet),
+                          SizedBox(width: 6),
+                          Text(
+                            'Google Maps API 키 설정 후 지도 활성화',
+                            style: TextStyle(fontSize: 11, color: kAccentViolet),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                )
+              : const SizedBox(),
+        ),
+      ),
+    );
   }
+}
+
+/// 산책 경로를 직접 그리는 페인터
+class _PathPainter extends CustomPainter {
+  final List<dynamic> path;
+  final bool isWalking;
+
+  _PathPainter({required this.path, required this.isWalking});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (path.length < 2) return;
+
+    final paint = Paint()
+      ..color = kAccentViolet
+      ..strokeWidth = 3
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    // 위도/경도 범위 계산
+    double minLat = path.first.latitude;
+    double maxLat = path.first.latitude;
+    double minLng = path.first.longitude;
+    double maxLng = path.first.longitude;
+
+    for (final p in path) {
+      if (p.latitude < minLat) minLat = p.latitude;
+      if (p.latitude > maxLat) maxLat = p.latitude;
+      if (p.longitude < minLng) minLng = p.longitude;
+      if (p.longitude > maxLng) maxLng = p.longitude;
+    }
+
+    final latRange = (maxLat - minLat).abs();
+    final lngRange = (maxLng - minLng).abs();
+    final range = latRange > lngRange ? latRange : lngRange;
+    if (range == 0) return;
+
+    final padding = size.width * 0.15;
+    final drawWidth = size.width - padding * 2;
+    final drawHeight = size.height * 0.5;
+    final offsetY = size.height * 0.2;
+
+    final pathObj = Path();
+    for (int i = 0; i < path.length; i++) {
+      final x = padding + ((path[i].longitude - minLng) / range) * drawWidth;
+      final y = offsetY + drawHeight - ((path[i].latitude - minLat) / range) * drawHeight;
+      if (i == 0) {
+        pathObj.moveTo(x, y);
+      } else {
+        pathObj.lineTo(x, y);
+      }
+    }
+    canvas.drawPath(pathObj, paint);
+
+    // 시작점
+    final startX = padding + ((path.first.longitude - minLng) / range) * drawWidth;
+    final startY = offsetY + drawHeight - ((path.first.latitude - minLat) / range) * drawHeight;
+    canvas.drawCircle(Offset(startX, startY), 6, Paint()..color = kSuccess);
+
+    // 현재 위치 (마지막 점)
+    final endX = padding + ((path.last.longitude - minLng) / range) * drawWidth;
+    final endY = offsetY + drawHeight - ((path.last.latitude - minLat) / range) * drawHeight;
+    canvas.drawCircle(Offset(endX, endY), 8, Paint()..color = kAccentViolet);
+    canvas.drawCircle(Offset(endX, endY), 14,
+        Paint()
+          ..color = kAccentViolet.withValues(alpha: 0.3)
+          ..style = PaintingStyle.fill);
+  }
+
+  @override
+  bool shouldRepaint(_PathPainter old) => old.path.length != path.length;
 }
 
 class _TopStatusBar extends StatelessWidget {
@@ -349,11 +399,11 @@ class _TopStatusBar extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        color: kBgSurface.withOpacity(0.95),
+        color: kBgSurface.withValues(alpha: 0.95),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: kBorderColor),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 10),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 10),
         ],
       ),
       child: Row(
@@ -378,7 +428,7 @@ class _TopStatusBar extends StatelessWidget {
           const Spacer(),
           _Badge(_gpsLabel(wp.gpsQuality), _gpsColor(wp.gpsQuality), Icons.gps_fixed),
           const SizedBox(width: 8),
-          _Badge('Saved', kSuccess, Icons.cloud_done_rounded),
+          const _Badge('Saved', kSuccess, Icons.cloud_done_rounded),
         ],
       ),
     );
@@ -397,9 +447,9 @@ class _Badge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.4)),
+        border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
       child: Row(
         children: [
