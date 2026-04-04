@@ -1,4 +1,16 @@
 import 'package:flutter/material.dart';
+<<<<<<< Updated upstream
+=======
+import 'package:provider/provider.dart';
+import 'providers/walk_provider.dart';
+import 'providers/settings_provider.dart';
+import 'screens/map_screen.dart';
+import 'screens/summary_screen.dart';
+import 'screens/records_screen.dart';
+import 'screens/profile_screen.dart';
+import 'screens/onboarding_screen.dart';
+import 'core/theme/app_theme.dart';
+>>>>>>> Stashed changes
 
 void main() {
   runApp(const MyApp());
@@ -10,6 +22,7 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+<<<<<<< Updated upstream
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
@@ -30,12 +43,25 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
+=======
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => SettingsProvider()..loadSettings()),
+        ChangeNotifierProvider(create: (_) => WalkProvider()),
+      ],
+      child: MaterialApp(
+        title: 'Walk Tracker',
+        debugShowCheckedModeBanner: false,
+        theme: buildAppTheme(),
+        home: const AppEntry(),
+>>>>>>> Stashed changes
       ),
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
 
+<<<<<<< Updated upstream
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
@@ -49,6 +75,28 @@ class MyHomePage extends StatefulWidget {
   // always marked "final".
 
   final String title;
+=======
+class AppEntry extends StatelessWidget {
+  const AppEntry({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<SettingsProvider>(
+      builder: (context, settings, _) {
+        if (!settings.onboardingCompleted) {
+          return OnboardingScreen(
+            onComplete: () {},
+          );
+        }
+        return const MainNavigation();
+      },
+    );
+  }
+}
+
+class MainNavigation extends StatefulWidget {
+  const MainNavigation({super.key});
+>>>>>>> Stashed changes
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -57,6 +105,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
 
+<<<<<<< Updated upstream
   void _incrementCounter() {
     setState(() {
       // This call to setState tells the Flutter framework that something has
@@ -67,6 +116,14 @@ class _MyHomePageState extends State<MyHomePage> {
       _counter++;
     });
   }
+=======
+  final List<Widget> _screens = const [
+    MapScreen(),
+    SummaryScreen(),
+    RecordsScreen(),
+    ProfileScreen(),
+  ];
+>>>>>>> Stashed changes
 
   @override
   Widget build(BuildContext context) {
@@ -77,6 +134,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return Scaffold(
+<<<<<<< Updated upstream
       appBar: AppBar(
         // TRY THIS: Try changing the color here to a specific color (to
         // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
@@ -112,6 +170,28 @@ class _MyHomePageState extends State<MyHomePage> {
               '$_counter',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
+=======
+      backgroundColor: kBgPrimary,
+      body: IndexedStack(
+        index: _currentIndex,
+        children: _screens,
+      ),
+      bottomNavigationBar: Container(
+        decoration: const BoxDecoration(
+          border: Border(top: BorderSide(color: kBorderColor)),
+        ),
+        child: BottomNavigationBar(
+          currentIndex: _currentIndex,
+          onTap: (i) => setState(() => _currentIndex = i),
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.map_outlined), activeIcon: Icon(Icons.map), label: '지도'),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.bar_chart_outlined), activeIcon: Icon(Icons.bar_chart), label: '요약'),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.history_outlined), activeIcon: Icon(Icons.history), label: '기록'),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.person_outline), activeIcon: Icon(Icons.person), label: '프로필'),
+>>>>>>> Stashed changes
           ],
         ),
       ),
