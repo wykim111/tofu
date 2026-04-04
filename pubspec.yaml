@@ -1,14 +1,6 @@
-<<<<<<< Updated upstream
-name: test_project
-description: "A new Flutter project."
-# The following line prevents the package from being accidentally published to
-# pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
-=======
 name: tofu
 description: "강아지 산책 앱 - Dog Walking App"
 publish_to: "none"
->>>>>>> Stashed changes
 
 version: 1.0.0+1
 
@@ -19,13 +11,6 @@ dependencies:
   flutter:
     sdk: flutter
 
-<<<<<<< Updated upstream
-
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.8
-
-=======
   cupertino_icons: ^1.0.8
 
   # 위치 및 지도
@@ -50,18 +35,10 @@ dependencies:
   # 이미지 선택
   image_picker: ^1.1.2
 
->>>>>>> Stashed changes
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
 
 flutter:
-<<<<<<< Updated upstream
-
-  # The following line ensures that the Material Icons font is
-  # included with your application, so that you can use the icons in
-  # the material Icons class.
-=======
->>>>>>> Stashed changes
   uses-material-design: true
